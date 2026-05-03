@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIST QUEST 🎮 – Python Lists Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky:    #0ea5e9;
+  --sky2:   #0284c7;
+  --sky3:   #38bdf8;
+  --navy:   #0f172a;
+  --navy2:  #1e293b;
+  --navy3:  #334155;
+  --yellow: #fde047;
+  --yellow2:#eab308;
+  --pink:   #f472b6;
+  --green:  #4ade80;
+  --green2: #16a34a;
+  --orange: #fb923c;
+  --purple: #a78bfa;
+  --red:    #f87171;
+  --white:  #f0f9ff;
+  --card:   #1e293b;
+  --border: rgba(14,165,233,0.25);
+  --glow:   0 0 24px rgba(14,165,233,0.45);
+  --glow-y: 0 0 24px rgba(253,224,71,0.50);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+
+body {
+  font-family:'Nunito',sans-serif;
+  background: var(--navy);
+  color: var(--white);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── STAR FIELD BACKGROUND ── */
+body::before {
+  content:'';
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(1.5px 1.5px at 10% 15%, rgba(255,255,255,0.6) 0%,transparent 100%),
+    radial-gradient(1px 1px   at 25% 40%, rgba(56,189,248,0.5) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 10%, rgba(255,255,255,0.4) 0%,transparent 100%),
+    radial-gradient(1px 1px   at 60% 25%, rgba(253,224,71,0.4) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 75% 55%, rgba(255,255,255,0.5) 0%,transparent 100%),
+    radial-gradient(1px 1px   at 85% 15%, rgba(56,189,248,0.5) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 80%, rgba(255,255,255,0.4) 0%,transparent 100%),
+    radial-gradient(1px 1px   at 15% 80%, rgba(167,139,250,0.5) 0%,transparent 100%),
+    radial-gradient(2px 2px   at 50% 60%, rgba(253,224,71,0.3) 0%,transparent 100%),
+    radial-gradient(1px 1px   at 35% 70%, rgba(255,255,255,0.4) 0%,transparent 100%),
+    linear-gradient(180deg,#0f172a 0%,#0c1a2e 60%,#0f172a 100%);
+}
+
+/* ── CONFETTI CANVAS ── */
+#confettiCanvas {
+  position:fixed;inset:0;z-index:9999;pointer-events:none;
+}
+
+/* ── PROGRESS BAR TOP ── */
+.progress-strip {
+  position:fixed;top:0;left:0;right:0;height:5px;z-index:200;
+  background:var(--navy3);
+}
+.progress-fill {
+  height:100%;background:linear-gradient(90deg,var(--sky),var(--yellow),var(--pink));
+  transition:width .5s ease;border-radius:0 3px 3px 0;
+  box-shadow:0 0 12px rgba(14,165,233,0.7);
+}
+
+/* ── STICKY HUD ── */
+.hud {
+  position:sticky;top:5px;z-index:100;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(15,23,42,0.92);
+  border:2px solid var(--border);
+  border-radius:50px;
+  padding:8px 20px;
+  margin:10px 16px 0;
+  box-shadow:var(--glow);
+  backdrop-filter:blur(8px);
+}
+.hud-name {
+  font-family:'Boogaloo',cursive;font-size:1rem;color:var(--sky3);
+  white-space:nowrap;
+}
+.xp-wrap {flex:1;display:flex;align-items:center;gap:8px;}
+.xp-bar {flex:1;height:12px;background:var(--navy3);border-radius:20px;overflow:hidden;border:1.5px solid rgba(14,165,233,0.3);}
+.xp-inner {height:100%;background:linear-gradient(90deg,var(--sky2),var(--sky3));border-radius:20px;transition:width .5s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 8px rgba(56,189,248,0.6);}
+.xp-label {font-size:.72rem;color:var(--sky3);font-weight:800;white-space:nowrap;}
+.level-badge {
+  font-family:'Boogaloo',cursive;font-size:.85rem;
+  background:linear-gradient(135deg,var(--yellow2),var(--yellow));
+  color:var(--navy);padding:4px 12px;border-radius:50px;
+  white-space:nowrap;font-weight:700;
+  box-shadow:var(--glow-y);
+  animation:pulseBadge 2s ease-in-out infinite;
+}
+@keyframes pulseBadge{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.hearts {font-size:1rem;letter-spacing:2px;}
+
+/* ── SCORE ROW ── */
+.score-row {
+  display:flex;gap:10px;padding:10px 16px 0;
+  max-width:900px;margin:0 auto;
+}
+.score-chip {
+  flex:1;background:var(--card);border:2px solid var(--border);
+  border-radius:16px;padding:10px 14px;text-align:center;
+  min-width:0;
+}
+.score-v {font-family:'Boogaloo',cursive;font-size:1.4rem;color:var(--yellow);}
+.score-l {font-size:.68rem;color:rgba(240,249,255,0.6);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* ── WRAP ── */
+.wrap {max-width:860px;margin:0 auto;padding:16px 16px 80px;position:relative;z-index:1;}
+
+/* ── HERO ── */
+.hero {
+  text-align:center;
+  padding:3rem 2rem 2.5rem;
+  background:linear-gradient(135deg,#0c1a2e 0%,#0f2a3f 50%,#0c1a2e 100%);
+  border-radius:28px;border:3px solid var(--sky);
+  margin-bottom:1.5rem;position:relative;overflow:hidden;
+  box-shadow:var(--glow), inset 0 0 60px rgba(14,165,233,0.04);
+}
+.hero::before {
+  content:'🎮 LEVEL 1 · LISTS 🎮';
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  font-family:'Boogaloo',cursive;font-size:.7rem;
+  color:rgba(56,189,248,0.4);letter-spacing:3px;white-space:nowrap;
+}
+.hero-emoji {font-size:70px;display:block;animation:heroFloat 3s ease-in-out infinite;margin-bottom:.8rem;filter:drop-shadow(0 0 20px rgba(14,165,233,0.6));}
+@keyframes heroFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-14px) rotate(3deg)}}
+.hero h1 {font-family:'Boogaloo',cursive;font-size:clamp(2.2rem,7vw,3.8rem);color:var(--yellow);text-shadow:0 0 30px rgba(253,224,71,0.5),0 4px 0 rgba(0,0,0,0.4);line-height:1.1;margin-bottom:.5rem;}
+.hero p {font-size:1.05rem;color:rgba(240,249,255,0.75);font-weight:600;margin-bottom:1.2rem;}
+.hero-tags {display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.htag {font-size:.72rem;font-weight:800;padding:4px 14px;border-radius:50px;letter-spacing:.5px;text-transform:uppercase;}
+.htag.blue{background:rgba(14,165,233,0.18);color:var(--sky3);border:1px solid rgba(56,189,248,0.4);}
+.htag.yellow{background:rgba(253,224,71,0.15);color:var(--yellow);border:1px solid rgba(253,224,71,0.4);}
+.htag.pink{background:rgba(244,114,182,0.15);color:var(--pink);border:1px solid rgba(244,114,182,0.4);}
+
+/* ── CHAPTER DIVIDER ── */
+.chap {display:flex;align-items:center;gap:12px;margin:2.5rem 0 1rem;}
+.chap-line {flex:1;height:2px;border-radius:2px;}
+.chap-line.blue{background:linear-gradient(90deg,transparent,var(--sky));}
+.chap-line.blue.rev{background:linear-gradient(270deg,transparent,var(--sky));}
+.chap-line.yellow{background:linear-gradient(90deg,transparent,var(--yellow));}
+.chap-line.yellow.rev{background:linear-gradient(270deg,transparent,var(--yellow));}
+.chap-line.pink{background:linear-gradient(90deg,transparent,var(--pink));}
+.chap-line.pink.rev{background:linear-gradient(270deg,transparent,var(--pink));}
+.chap-line.green{background:linear-gradient(90deg,transparent,var(--green));}
+.chap-line.green.rev{background:linear-gradient(270deg,transparent,var(--green));}
+.chap-lbl {
+  font-family:'Boogaloo',cursive;font-size:.85rem;white-space:nowrap;
+  padding:5px 18px;border-radius:50px;letter-spacing:1px;
+}
+.chap-lbl.blue{color:var(--sky);border:2px solid rgba(14,165,233,0.4);background:rgba(14,165,233,0.08);}
+.chap-lbl.yellow{color:var(--yellow);border:2px solid rgba(253,224,71,0.4);background:rgba(253,224,71,0.08);}
+.chap-lbl.pink{color:var(--pink);border:2px solid rgba(244,114,182,0.4);background:rgba(244,114,182,0.08);}
+.chap-lbl.green{color:var(--green);border:2px solid rgba(74,222,128,0.4);background:rgba(74,222,128,0.08);}
+
+/* ── SECTION CARD ── */
+.scard {
+  background:var(--card);border-radius:20px;padding:1.8rem;
+  margin-bottom:1.2rem;border:2px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.scard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--sky),var(--sky3),var(--sky));border-radius:20px 20px 0 0;}
+.scard.yellow-t::before{background:linear-gradient(90deg,var(--yellow2),var(--yellow),var(--yellow2));}
+.scard.pink-t::before{background:linear-gradient(90deg,var(--pink),#ec4899,var(--pink));}
+.scard.green-t::before{background:linear-gradient(90deg,var(--green2),var(--green),var(--green2));}
+.scard.purple-t::before{background:linear-gradient(90deg,var(--purple),#8b5cf6,var(--purple));}
+
+.scard-hdr{display:flex;align-items:center;gap:12px;margin-bottom:1.2rem;}
+.scard-ico{font-size:2rem;}
+.scard-title{font-family:'Boogaloo',cursive;font-size:1.4rem;color:var(--sky3);}
+.scard.yellow-t .scard-title{color:var(--yellow);}
+.scard.pink-t .scard-title{color:var(--pink);}
+.scard.green-t .scard-title{color:var(--green);}
+.scard.purple-t .scard-title{color:var(--purple);}
+.scard-sub{font-size:.78rem;color:rgba(240,249,255,0.55);font-weight:700;margin-top:2px;}
+
+/* ── THEORY NUGGET ── */
+.nugget {
+  background:rgba(14,165,233,0.08);border:2px solid rgba(14,165,233,0.25);
+  border-radius:14px;padding:1rem 1.2rem;margin:.8rem 0;
+  font-size:.95rem;line-height:1.8;color:rgba(240,249,255,0.88);
+}
+.nugget.yellow{background:rgba(253,224,71,0.07);border-color:rgba(253,224,71,0.25);}
+.nugget.pink{background:rgba(244,114,182,0.07);border-color:rgba(244,114,182,0.25);}
+.nugget.green{background:rgba(74,222,128,0.07);border-color:rgba(74,222,128,0.25);}
+.nugget ul{list-style:none;padding:0;}
+.nugget li{padding:3px 0 3px 1.4rem;position:relative;}
+.nugget li::before{content:'▶';position:absolute;left:0;color:var(--sky);font-size:.65rem;top:6px;}
+.nugget.yellow li::before{color:var(--yellow);}
+.nugget.green li::before{color:var(--green);}
+
+/* ── CODE BOX ── */
+.codebox {
+  background:#080e1a;border:2px solid rgba(14,165,233,0.25);
+  border-radius:14px;padding:1.2rem 1.4rem;
+  font-family:'Courier New',monospace;font-size:.9rem;line-height:2;
+  margin:.8rem 0;overflow-x:auto;position:relative;
+}
+.codebox .cb-label{
+  position:absolute;top:8px;right:12px;
+  font-family:'Nunito',sans-serif;font-size:.62rem;font-weight:800;
+  color:rgba(56,189,248,0.5);letter-spacing:1px;text-transform:uppercase;
+}
+.kw{color:#c084fc;font-weight:700;}
+.fn{color:var(--sky3);}
+.str{color:var(--green);}
+.num{color:var(--orange);}
+.cmt{color:#2a3f5a;font-style:italic;}
+.idx{color:var(--yellow);}
+
+/* ── INVENTORY VISUAL ── */
+.inventory {
+  display:flex;gap:8px;flex-wrap:wrap;margin:.8rem 0;justify-content:center;
+}
+.inv-slot {
+  background:var(--navy);border:3px solid var(--sky);border-radius:12px;
+  padding:8px 14px;font-family:'Boogaloo',cursive;font-size:.9rem;
+  color:var(--sky3);position:relative;text-align:center;min-width:70px;
+  box-shadow:0 0 10px rgba(14,165,233,0.2);transition:transform .2s;
+}
+.inv-slot:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(14,165,233,0.4);}
+.inv-slot .slot-idx{
+  position:absolute;top:-8px;left:-8px;
+  background:var(--navy);border:2px solid var(--yellow);
+  border-radius:50%;width:20px;height:20px;
+  font-size:.6rem;color:var(--yellow);font-family:'Boogaloo',cursive;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 11px;border-radius:50px;font-size:.68rem;font-weight:800;margin-left:auto;text-transform:uppercase;letter-spacing:.5px;}
+.bl{background:rgba(14,165,233,0.15);color:var(--sky3);border:1.5px solid rgba(56,189,248,0.35);}
+.be{background:rgba(253,224,71,0.12);color:var(--yellow);border:1.5px solid rgba(253,224,71,0.35);}
+.bg{background:rgba(74,222,128,0.12);color:var(--green);border:1.5px solid rgba(74,222,128,0.35);}
+.bp{background:rgba(244,114,182,0.12);color:var(--pink);border:1.5px solid rgba(244,114,182,0.35);}
+.bv{background:rgba(167,139,250,0.12);color:var(--purple);border:1.5px solid rgba(167,139,250,0.35);}
+.bb{background:rgba(248,113,113,0.12);color:var(--red);border:1.5px solid rgba(248,113,113,0.35);}
+
+/* ── LORE ── */
+.lore{
+  background:rgba(14,165,233,0.06);border-left:4px solid var(--sky);
+  border-radius:0 14px 14px 0;padding:.9rem 1.1rem;margin:.8rem 0;
+  font-size:.95rem;line-height:1.8;
+}
+.lore .nar{display:block;font-family:'Boogaloo',cursive;font-size:.75rem;color:var(--sky3);margin-bottom:4px;letter-spacing:.5px;}
+.lore.yellow{border-left-color:var(--yellow);background:rgba(253,224,71,0.06);}
+.lore.yellow .nar{color:var(--yellow);}
+.lore.pink{border-left-color:var(--pink);background:rgba(244,114,182,0.06);}
+.lore.pink .nar{color:var(--pink);}
+.lore.green{border-left-color:var(--green);background:rgba(74,222,128,0.06);}
+.lore.green .nar{color:var(--green);}
+
+/* ── EXERCISE BLANK ── */
+.bex{
+  background:rgba(14,165,233,0.05);border:2.5px dashed rgba(14,165,233,0.35);
+  border-radius:16px;padding:1.2rem 1.4rem;margin:.8rem 0;
+}
+.bex.yellow-bex{background:rgba(253,224,71,0.04);border-color:rgba(253,224,71,0.35);}
+.bex.pink-bex{background:rgba(244,114,182,0.04);border-color:rgba(244,114,182,0.35);}
+.bex.green-bex{background:rgba(74,222,128,0.04);border-color:rgba(74,222,128,0.35);}
+.bex.purple-bex{background:rgba(167,139,250,0.04);border-color:rgba(167,139,250,0.35);}
+.ext{font-family:'Boogaloo',cursive;font-size:.82rem;color:var(--sky3);letter-spacing:.5px;margin-bottom:.7rem;display:flex;align-items:center;gap:6px;}
+.bex.yellow-bex .ext{color:var(--yellow);}
+.bex.pink-bex .ext{color:var(--pink);}
+.bex.green-bex .ext{color:var(--green);}
+.bex.purple-bex .ext{color:var(--purple);}
+.ca{
+  background:#080e1a;border:2px solid rgba(14,165,233,0.15);
+  border-radius:10px;padding:1rem 1.2rem;
+  font-family:'Courier New',monospace;font-size:.9rem;
+  line-height:2.2;color:var(--white);margin-bottom:.8rem;overflow-x:auto;
+}
+.bex.yellow-bex .ca{border-color:rgba(253,224,71,0.12);}
+.bex.pink-bex .ca{border-color:rgba(244,114,182,0.12);}
+.bex.green-bex .ca{border-color:rgba(74,222,128,0.12);}
+.blank{
+  display:inline-block;background:rgba(14,165,233,0.12);
+  border:2.5px solid rgba(14,165,233,0.5);border-radius:8px;
+  min-width:90px;padding:1px 10px;
+  font-family:'Courier New',monospace;font-size:.88rem;
+  color:var(--sky3);font-weight:700;outline:none;
+  transition:all .2s;vertical-align:middle;
+}
+.blank:focus{border-color:var(--yellow);background:rgba(253,224,71,0.12);color:var(--yellow);}
+.blank.ok{border-color:var(--green);background:rgba(74,222,128,0.15);color:var(--green);}
+.blank.no{border-color:var(--red);background:rgba(248,113,113,0.15);color:var(--red);animation:shake .4s;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.hint-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(167,139,250,0.12);border:1.5px solid rgba(167,139,250,0.3);
+  border-radius:50px;padding:4px 12px;font-size:.78rem;
+  color:var(--purple);font-weight:700;margin-top:.5rem;
+}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:50px;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;border:none;transition:transform .15s,box-shadow .15s;}
+.btn:hover{transform:translateY(-3px);}
+.btn:active{transform:scale(.96);}
+.btn-blue{background:linear-gradient(135deg,var(--sky2),var(--sky));color:white;box-shadow:0 4px 18px rgba(14,165,233,0.4);}
+.btn-yellow{background:linear-gradient(135deg,var(--yellow2),var(--yellow));color:var(--navy);box-shadow:0 4px 18px rgba(253,224,71,0.4);}
+.btn-pink{background:linear-gradient(135deg,#db2777,var(--pink));color:white;box-shadow:0 4px 18px rgba(244,114,182,0.4);}
+.btn-green{background:linear-gradient(135deg,var(--green2),var(--green));color:white;box-shadow:0 4px 18px rgba(74,222,128,0.4);}
+.btn-ghost{background:transparent;color:rgba(240,249,255,0.5);border:2px solid rgba(255,255,255,0.15);}
+.bgrp{display:flex;gap:8px;flex-wrap:wrap;margin-top:.8rem;}
+
+/* ── FEEDBACK ── */
+.fb{display:none;border-radius:14px;padding:.8rem 1.1rem;font-weight:700;font-size:.92rem;margin-top:.8rem;align-items:center;gap:10px;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(74,222,128,0.12);color:var(--green);border:2px solid rgba(74,222,128,0.35);}
+.fb.err{background:rgba(248,113,113,0.12);color:var(--red);border:2px solid rgba(248,113,113,0.3);}
+
+/* ── TRUE FALSE ── */
+.tf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:.8rem 0;}
+.tf-item{background:var(--navy2);border:2px solid rgba(14,165,233,0.2);border-radius:14px;padding:.9rem 1rem;}
+.tf-q{font-size:.9rem;line-height:1.6;margin-bottom:.7rem;font-weight:600;}
+.tf-btns{display:flex;gap:8px;}
+.tf-btn{flex:1;padding:8px;border-radius:50px;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;cursor:pointer;border:2.5px solid;transition:all .2s;}
+.tft{background:rgba(74,222,128,0.08);border-color:rgba(74,222,128,0.4);color:var(--green);}
+.tff{background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.35);color:var(--red);}
+.tf-btn:hover{filter:brightness(1.3);transform:scale(1.03);}
+.tf-btn.sok{background:rgba(74,222,128,0.25);border-color:var(--green);}
+.tf-btn.sno{background:rgba(248,113,113,0.25);border-color:var(--red);}
+.tf-fb{font-size:.8rem;margin-top:.5rem;display:none;font-weight:700;line-height:1.5;}
+.tf-fb.show{display:block;}
+.tf-fb.ok{color:var(--green);}
+.tf-fb.err{color:var(--red);}
+
+/* ── QUIZ ── */
+.qcard{background:var(--navy2);border:2px solid rgba(253,224,71,0.18);border-radius:16px;padding:1.1rem 1.3rem;margin-bottom:.9rem;}
+.qcard.blue-q{border-color:rgba(14,165,233,0.2);}
+.qcard.pink-q{border-color:rgba(244,114,182,0.2);}
+.qcard.green-q{border-color:rgba(74,222,128,0.2);}
+.qnum{font-family:'Boogaloo',cursive;font-size:.78rem;color:var(--yellow);letter-spacing:.5px;margin-bottom:.4rem;}
+.qcard.blue-q .qnum{color:var(--sky3);}
+.qcard.pink-q .qnum{color:var(--pink);}
+.qcard.green-q .qnum{color:var(--green);}
+.qq{font-weight:700;font-size:.92rem;margin-bottom:.9rem;line-height:1.55;}
+.qopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.qopt{background:var(--navy);border:2px solid rgba(253,224,71,0.18);border-radius:12px;padding:.65rem 1rem;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Nunito',sans-serif;color:var(--white);text-align:left;}
+.qcard.blue-q .qopt{border-color:rgba(14,165,233,0.18);}
+.qcard.pink-q .qopt{border-color:rgba(244,114,182,0.18);}
+.qcard.green-q .qopt{border-color:rgba(74,222,128,0.18);}
+.qopt:hover{transform:scale(1.02);}
+.qopt.correct{background:rgba(74,222,128,0.15);border-color:var(--green);color:var(--green);}
+.qopt.wrong{background:rgba(248,113,113,0.12);border-color:var(--red);color:var(--red);animation:shake .3s;}
+
+/* ── MATCH GAME ── */
+.match-wrap{background:linear-gradient(135deg,#0c1a2e,#0f1e30);border:2px solid rgba(167,139,250,0.35);border-radius:20px;padding:1.5rem;box-shadow:0 0 24px rgba(167,139,250,0.15);}
+.match-wrap h3{font-family:'Boogaloo',cursive;font-size:1.1rem;color:var(--purple);margin-bottom:.4rem;}
+.match-cols{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;}
+.mcol{flex:1;min-width:150px;}
+.mlbl{font-family:'Boogaloo',cursive;font-size:.72rem;color:rgba(240,249,255,0.5);letter-spacing:.5px;margin-bottom:.5rem;text-transform:uppercase;}
+.mi{background:var(--navy);border:2px solid rgba(167,139,250,0.25);border-radius:10px;padding:.55rem .9rem;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:6px;transition:all .2s;color:rgba(240,249,255,0.85);}
+.mi:hover{background:rgba(167,139,250,0.12);border-color:var(--purple);transform:scale(1.02);}
+.mi.sel{background:rgba(167,139,250,0.22);border-color:var(--purple);color:var(--purple);}
+.mi.mat{background:rgba(74,222,128,0.12);border-color:var(--green);color:var(--green);cursor:default;}
+.mi.bad{background:rgba(248,113,113,0.12);border-color:var(--red);color:var(--red);animation:shake .4s;}
+.mres{text-align:center;padding:.8rem;background:rgba(255,255,255,0.04);border-radius:10px;font-weight:700;font-size:.9rem;min-height:42px;display:flex;align-items:center;justify-content:center;color:rgba(240,249,255,0.5);}
+
+/* ── ORDER GAME ── */
+.ogame{background:rgba(253,224,71,0.05);border:2px solid rgba(253,224,71,0.25);border-radius:16px;padding:1.2rem;}
+.otitle{font-family:'Boogaloo',cursive;font-size:.82rem;color:var(--yellow);letter-spacing:.5px;margin-bottom:.8rem;}
+.olist{display:flex;flex-direction:column;gap:6px;}
+.oi{background:var(--navy2);border:2px solid rgba(253,224,71,0.25);border-radius:10px;padding:.65rem 1rem;font-family:'Courier New',monospace;font-size:.86rem;cursor:grab;display:flex;align-items:center;gap:10px;transition:all .2s;font-weight:600;user-select:none;}
+.oi:hover{border-color:var(--yellow);background:rgba(253,224,71,0.07);}
+.oi.dragging{opacity:.3;}
+.oi.over{border-style:dashed;border-color:var(--sky);}
+.dh{color:var(--yellow);font-size:.9rem;}
+
+/* ── POWER UP ALERT ── */
+.powerup {
+  display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  z-index:500;background:linear-gradient(135deg,var(--sky2),var(--sky));
+  color:white;border-radius:24px;padding:2rem 3rem;text-align:center;
+  box-shadow:0 0 60px rgba(14,165,233,0.6);
+  font-family:'Boogaloo',cursive;
+}
+.powerup.show{display:block;animation:powerPop .5s cubic-bezier(.175,.885,.32,1.275) forwards;}
+@keyframes powerPop{from{transform:translate(-50%,-50%) scale(0)}to{transform:translate(-50%,-50%) scale(1)}}
+.powerup-emoji{font-size:3rem;display:block;margin-bottom:.5rem;}
+.powerup-text{font-size:1.8rem;}
+
+/* ── BREAK CARD ── */
+.break-card {
+  background:linear-gradient(135deg,rgba(167,139,250,0.1),rgba(244,114,182,0.08));
+  border:2px solid rgba(167,139,250,0.3);border-radius:20px;
+  padding:1.2rem 1.5rem;margin:1.5rem 0;text-align:center;
+}
+.break-card .break-emoji{font-size:2.5rem;display:block;margin-bottom:.5rem;}
+.break-card p{font-size:.95rem;color:rgba(240,249,255,0.8);font-weight:600;}
+.break-card strong{color:var(--purple);}
+
+/* ── STARBURST ── */
+.sb{position:fixed;pointer-events:none;font-size:2rem;animation:sbgo 1s ease forwards;z-index:9998;}
+@keyframes sbgo{0%{transform:scale(0) translateY(0);opacity:1}100%{transform:scale(2.5) translateY(-120px);opacity:0}}
+
+/* ── COMPLETION ── */
+.compl{display:none;text-align:center;padding:3rem 2rem;
+  background:linear-gradient(135deg,#0c1a2e,#0f2a3f);
+  border:3px solid var(--yellow);border-radius:28px;
+  box-shadow:var(--glow-y);margin-top:2rem;}
+.compl.show{display:block;animation:popIn .6s cubic-bezier(.175,.885,.32,1.275);}
+@keyframes popIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.compl .big{font-size:80px;display:block;margin-bottom:1rem;animation:heroFloat 3s ease-in-out infinite;}
+.compl h2{font-family:'Boogaloo',cursive;font-size:2.5rem;color:var(--yellow);margin-bottom:.8rem;}
+.compl p{font-size:1rem;color:rgba(240,249,255,0.8);line-height:1.8;}
+
+@media(max-width:600px){
+  .tf-grid,.qopts{grid-template-columns:1fr;}
+  .match-cols{flex-direction:column;}
+  .score-row{display:grid;grid-template-columns:1fr 1fr;}
+  .hero h1{font-size:1.9rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- CONFETTI CANVAS -->
+<canvas id="confettiCanvas"></canvas>
+
+<!-- POWER UP OVERLAY -->
+<div class="powerup" id="powerup">
+  <span class="powerup-emoji" id="powerupEmoji">⭐</span>
+  <div class="powerup-text" id="powerupText">LEVEL UP!</div>
+</div>
+
+<!-- PROGRESS STRIP -->
+<div class="progress-strip"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+
+<!-- HUD -->
+<div class="hud">
+  <span class="hud-name">🎮 LIST QUEST</span>
+  <div class="xp-wrap">
+    <div class="xp-bar"><div class="xp-inner" id="xpBar" style="width:0%"></div></div>
+    <span class="xp-label">⚡ <span id="xpNum">0</span>/30 XP</span>
+  </div>
+  <span class="level-badge" id="levelBadge">🌟 STARTER</span>
+  <span class="hearts" id="hearts">❤️❤️❤️</span>
+</div>
+
+<!-- SCORE ROW -->
+<div class="score-row">
+  <div class="score-chip"><div class="score-v" id="scEx">0/10</div><div class="score-l">Exercises</div></div>
+  <div class="score-chip"><div class="score-v" id="scTF">0/8</div><div class="score-l">True/False</div></div>
+  <div class="score-chip"><div class="score-v" id="scQz">0/10</div><div class="score-l">Quiz</div></div>
+  <div class="score-chip"><div class="score-v" id="scBon">0/2</div><div class="score-l">Bonus</div></div>
+</div>
+
+<div class="wrap">
+
+<!-- ════ HERO ════ -->
+<div class="hero">
+  <span class="hero-emoji">🎮</span>
+  <h1>LIST QUEST!</h1>
+  <p>Python Lists are like your game inventory — let's master them! 🚀</p>
+  <div class="hero-tags">
+    <span class="htag blue">🔵 10 Exercises</span>
+    <span class="htag yellow">⭐ 10 Quizzes</span>
+    <span class="htag pink">💖 8 True/False</span>
+  </div>
+</div>
+
+<!-- ══ CHAPTER 1: WHAT IS A LIST ══ -->
+<div class="chap"><div class="chap-line blue"></div><span class="chap-lbl blue">🎒 Chapter 1 · What Is a List?</span><div class="chap-line blue rev"></div></div>
+
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">🎒</span><div><div class="scard-title">Your Game Inventory!</div><div class="scard-sub">Lists are collections of items</div></div><span class="badge bl">Theory</span></div>
+  <div class="lore"><span class="nar">🧙 SAGE CODY SAYS:</span>Imagine you're playing an RPG game. Your inventory holds many items at once — a sword, 5 health potions, a magic shield. In Python, a <strong>list</strong> is exactly like that inventory! It holds many values in one variable.</div>
+
+  <div class="inventory">
+    <div class="inv-slot"><div class="slot-idx">0</div>⚔️<br><small>sword</small></div>
+    <div class="inv-slot"><div class="slot-idx">1</div>🧪<br><small>potion</small></div>
+    <div class="inv-slot"><div class="slot-idx">2</div>🛡️<br><small>shield</small></div>
+    <div class="inv-slot"><div class="slot-idx">3</div>🔑<br><small>key</small></div>
+    <div class="inv-slot"><div class="slot-idx">4</div>💎<br><small>gem</small></div>
+  </div>
+
+  <div class="nugget">
+    <strong style="color:var(--sky3)">🔑 Key Rules:</strong><br>
+    <ul>
+      <li>Lists use <strong>square brackets</strong> <code>[ ]</code></li>
+      <li>Items are separated by <strong>commas</strong> <code>,</code></li>
+      <li>Items can be strings, numbers, or mixed!</li>
+      <li>Lists are <strong>ordered</strong> — items stay in position</li>
+      <li>Lists are <strong>changeable</strong> — you can edit them</li>
+    </ul>
+  </div>
+
+  <div class="codebox">
+    <div class="cb-label">Python</div>
+<span class="cmt"># This is a list! Like a game inventory:</span>
+inventory = [<span class="str">"sword"</span>, <span class="str">"potion"</span>, <span class="str">"shield"</span>, <span class="str">"key"</span>]
+
+<span class="cmt"># A list of numbers (scores!):</span>
+scores = [<span class="num">100</span>, <span class="num">250</span>, <span class="num">75</span>, <span class="num">400</span>]
+
+<span class="cmt"># Even a mixed list works:</span>
+player = [<span class="str">"Aria"</span>, <span class="num">15</span>, <span class="kw">True</span>, <span class="num">500</span>]
+
+<span class="fn">print</span>(inventory)   <span class="cmt"># → ['sword', 'potion', 'shield', 'key']</span>
+  </div>
+</div>
+
+<!-- EX 1 -->
+<div class="scard yellow-t">
+  <div class="scard-hdr"><span class="scard-ico">⚔️</span><div><div class="scard-title">Exercise 1 — Build Your Inventory</div><div class="scard-sub">Create your first list!</div></div><span class="badge be">EX 1/10</span></div>
+  <div class="lore yellow"><span class="nar">🧙 SAGE CODY:</span>Complete the code to build your game inventory list with 3 items!</div>
+  <div class="bex yellow-bex">
+    <div class="ext">⚔️ Build the list!</div>
+    <div class="ca">
+<span class="cmt"># Create a list with 3 game items:</span><br>
+inventory = <input class="blank" id="e1b1" placeholder="???" maxlength="2">"sword"<span class="cmt">,</span> "potion"<span class="cmt">,</span> "shield"<input class="blank" id="e1b2" placeholder="???" maxlength="2"><br><br>
+<span class="fn">print</span>(inventory)
+    </div>
+    <div class="bgrp"><button class="btn btn-yellow" onclick="checkEx(1)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(1)">↺ Reset</button></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: Lists start with <code>[</code> and end with <code>]</code></div>
+</div>
+
+<!-- ══ CHAPTER 2: INDEXING ══ -->
+<div class="chap"><div class="chap-line yellow"></div><span class="chap-lbl yellow">🔢 Chapter 2 · Accessing Items (Indexing!)</span><div class="chap-line yellow rev"></div></div>
+
+<div class="scard yellow-t">
+  <div class="scard-hdr"><span class="scard-ico">🔢</span><div><div class="scard-title">Index = Slot Number!</div><div class="scard-sub">Counting starts at ZERO 🤯</div></div><span class="badge be">Theory</span></div>
+  <div class="lore yellow"><span class="nar">🧙 SAGE CODY:</span>Here's the WILD part — in Python, counting starts at 0, not 1! The first item is at index <strong>[0]</strong>, the second at <strong>[1]</strong>, and so on. Think of them as slot numbers in your inventory!</div>
+
+  <div class="inventory">
+    <div class="inv-slot"><div class="slot-idx">0</div>⚔️<br><small>"sword"</small></div>
+    <div class="inv-slot"><div class="slot-idx">1</div>🧪<br><small>"potion"</small></div>
+    <div class="inv-slot"><div class="slot-idx">2</div>🛡️<br><small>"shield"</small></div>
+    <div class="inv-slot"><div class="slot-idx">3</div>🔑<br><small>"key"</small></div>
+  </div>
+
+  <div class="nugget yellow">
+    <strong style="color:var(--yellow)">💡 Negative Indexes:</strong> Count backwards from the end!<br>
+    <code>list[-1]</code> = LAST item &nbsp;|&nbsp; <code>list[-2]</code> = second to last
+  </div>
+
+  <div class="codebox">
+inventory = [<span class="str">"sword"</span>, <span class="str">"potion"</span>, <span class="str">"shield"</span>, <span class="str">"key"</span>]
+
+<span class="fn">print</span>(inventory[<span class="idx">0</span>])   <span class="cmt"># → "sword"   (1st item)</span>
+<span class="fn">print</span>(inventory[<span class="idx">2</span>])   <span class="cmt"># → "shield"  (3rd item)</span>
+<span class="fn">print</span>(inventory[<span class="idx">-1</span>])  <span class="cmt"># → "key"     (LAST item!)</span>
+<span class="fn">print</span>(inventory[<span class="idx">-2</span>])  <span class="cmt"># → "shield"  (2nd from end)</span>
+  </div>
+</div>
+
+<!-- EX 2 -->
+<div class="scard yellow-t">
+  <div class="scard-hdr"><span class="scard-ico">🎯</span><div><div class="scard-title">Exercise 2 — Grab the Right Item!</div><div class="scard-sub">Use the correct index</div></div><span class="badge be">EX 2/10</span></div>
+  <div class="bex yellow-bex">
+    <div class="ext">🎯 Access the items!</div>
+    <div class="ca">
+weapons = [<span class="str">"bow"</span>, <span class="str">"axe"</span>, <span class="str">"wand"</span>, <span class="str">"spear"</span>]<br><br>
+<span class="cmt"># Print "bow" (first item):</span><br>
+<span class="fn">print</span>(weapons[<input class="blank" id="e2b1" placeholder="?" maxlength="2">])<br><br>
+<span class="cmt"># Print "wand" (third item):</span><br>
+<span class="fn">print</span>(weapons[<input class="blank" id="e2b2" placeholder="?" maxlength="2">])<br><br>
+<span class="cmt"># Print "spear" (last item):</span><br>
+<span class="fn">print</span>(weapons[<input class="blank" id="e2b3" placeholder="??" maxlength="3">])
+    </div>
+    <div class="bgrp"><button class="btn btn-yellow" onclick="checkEx(2)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(2)">↺ Reset</button></div>
+    <div class="fb" id="fb2"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: first=0, third=2, last=-1</div>
+</div>
+
+<!-- T/F SET 1 -->
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">⚡</span><div><div class="scard-title">Quick Fire! True or False?</div><div class="scard-sub">Think fast! 0.5 XP each</div></div><span class="badge bl">True/False</span></div>
+  <div class="tf-grid" id="tfGrid1"></div>
+</div>
+
+<!-- ══ CHAPTER 3: LIST METHODS ══ -->
+<div class="chap"><div class="chap-line pink"></div><span class="chap-lbl pink">⚡ Chapter 3 · List Superpowers (Methods!)</span><div class="chap-line pink rev"></div></div>
+
+<div class="scard pink-t">
+  <div class="scard-hdr"><span class="scard-ico">⚡</span><div><div class="scard-title">Superpowers for Your List!</div><div class="scard-sub">append, remove, pop, len, sort</div></div><span class="badge bp">Theory</span></div>
+  <div class="lore pink"><span class="nar">🧙 SAGE CODY:</span>Lists have built-in SUPERPOWERS called methods! You use them with a dot: <code>mylist.method()</code>. They let you add items, remove items, sort them, and more!</div>
+
+  <div class="codebox">
+inventory = [<span class="str">"sword"</span>, <span class="str">"potion"</span>, <span class="str">"shield"</span>]
+
+<span class="cmt"># ➕ ADD to the end:</span>
+inventory.<span class="fn">append</span>(<span class="str">"bow"</span>)
+<span class="cmt"># → ["sword", "potion", "shield", "bow"]</span>
+
+<span class="cmt"># ➕ INSERT at a position:</span>
+inventory.<span class="fn">insert</span>(<span class="idx">1</span>, <span class="str">"key"</span>)
+<span class="cmt"># → ["sword", "key", "potion", "shield", "bow"]</span>
+
+<span class="cmt"># ❌ REMOVE by name:</span>
+inventory.<span class="fn">remove</span>(<span class="str">"potion"</span>)
+
+<span class="cmt"># 🗑️ POP removes last (or by index):</span>
+last_item = inventory.<span class="fn">pop</span>()
+
+<span class="cmt"># 📏 LEN counts items:</span>
+<span class="fn">print</span>(<span class="fn">len</span>(inventory))   <span class="cmt"># → 3</span>
+
+<span class="cmt"># 🔡 SORT alphabetically:</span>
+inventory.<span class="fn">sort</span>()
+
+<span class="cmt"># 🔄 REVERSE the order:</span>
+inventory.<span class="fn">reverse</span>()
+  </div>
+
+  <div class="nugget pink">
+    <strong style="color:var(--pink)">🎮 Quick Reference:</strong><br>
+    <code>.append(x)</code> → Add x at end &nbsp;|&nbsp; <code>.insert(i, x)</code> → Add x at position i<br>
+    <code>.remove(x)</code> → Delete x &nbsp;|&nbsp; <code>.pop()</code> → Remove & return last item<br>
+    <code>len(list)</code> → Count items &nbsp;|&nbsp; <code>.sort()</code> → Sort it!
+  </div>
+</div>
+
+<!-- EX 3 -->
+<div class="scard pink-t">
+  <div class="scard-hdr"><span class="scard-ico">➕</span><div><div class="scard-title">Exercise 3 — Power Up Your Inventory!</div><div class="scard-sub">Use append and remove</div></div><span class="badge bp">EX 3/10</span></div>
+  <div class="bex pink-bex">
+    <div class="ext">➕ Add & Remove!</div>
+    <div class="ca">
+spells = [<span class="str">"fire"</span>, <span class="str">"ice"</span>, <span class="str">"thunder"</span>]<br><br>
+<span class="cmt"># Add "heal" to the end of the list:</span><br>
+spells.<input class="blank" id="e3b1" placeholder="???" maxlength="8">(<span class="str">"heal"</span>)<br><br>
+<span class="cmt"># Remove "ice" from the list:</span><br>
+spells.<input class="blank" id="e3b2" placeholder="???" maxlength="8">(<span class="str">"ice"</span>)<br><br>
+<span class="cmt"># Print how many spells are left:</span><br>
+<span class="fn">print</span>(<input class="blank" id="e3b3" placeholder="???" maxlength="4">(spells))
+    </div>
+    <div class="bgrp"><button class="btn btn-pink" onclick="checkEx(3)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(3)">↺ Reset</button></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: append, remove, len</div>
+</div>
+
+<!-- EX 4 -->
+<div class="scard pink-t">
+  <div class="scard-hdr"><span class="scard-ico">📏</span><div><div class="scard-title">Exercise 4 — Sort the Scores!</div><div class="scard-sub">Sort and reverse a list</div></div><span class="badge bp">EX 4/10</span></div>
+  <div class="bex pink-bex">
+    <div class="ext">📊 Sort those scores!</div>
+    <div class="ca">
+scores = [<span class="num">350</span>, <span class="num">100</span>, <span class="num">800</span>, <span class="num">250</span>, <span class="num">50</span>]<br><br>
+<span class="cmt"># Sort from smallest to biggest:</span><br>
+scores.<input class="blank" id="e4b1" placeholder="???" maxlength="6">()<br>
+<span class="fn">print</span>(scores)  <span class="cmt"># → [50, 100, 250, 350, 800]</span><br><br>
+<span class="cmt"># Now reverse (biggest first):</span><br>
+scores.<input class="blank" id="e4b2" placeholder="???" maxlength="8">()<br>
+<span class="fn">print</span>(scores)  <span class="cmt"># → [800, 350, 250, 100, 50]</span>
+    </div>
+    <div class="bgrp"><button class="btn btn-pink" onclick="checkEx(4)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(4)">↺ Reset</button></div>
+    <div class="fb" id="fb4"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: sort(), reverse()</div>
+</div>
+
+<!-- BREAK CARD -->
+<div class="break-card">
+  <span class="break-emoji">🌟</span>
+  <p><strong>Awesome work! You're halfway through Chapter 3!</strong><br>Take a deep breath, shake out your hands, and you're ready to keep going! 💪</p>
+</div>
+
+<!-- QUIZ 1 -->
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">🎯</span><div><div class="scard-title">QUIZ BOSS — Level 1!</div><div class="scard-sub">5 questions · 1 XP each · You got this!</div></div><span class="badge be">QUIZ</span></div>
+
+  <div class="qcard blue-q"><div class="qnum">QUESTION 1</div><div class="qq">Which of these correctly creates a Python list?</div><div class="qopts"><button class="qopt" onclick="qans(1,'w',this)">items = (1, 2, 3)</button><button class="qopt" onclick="qans(1,'c',this)">items = [1, 2, 3]</button><button class="qopt" onclick="qans(1,'w',this)">items = {1, 2, 3}</button><button class="qopt" onclick="qans(1,'w',this)">items = &lt;1, 2, 3&gt;</button></div><div class="fb" id="qfb1"></div></div>
+
+  <div class="qcard blue-q"><div class="qnum">QUESTION 2</div><div class="qq">What index is the FIRST item in a list?</div><div class="qopts"><button class="qopt" onclick="qans(2,'w',this)">1</button><button class="qopt" onclick="qans(2,'c',this)">0</button><button class="qopt" onclick="qans(2,'w',this)">-1</button><button class="qopt" onclick="qans(2,'w',this)">first</button></div><div class="fb" id="qfb2"></div></div>
+
+  <div class="qcard blue-q"><div class="qnum">QUESTION 3</div><div class="qq">What does <code>my_list[-1]</code> give you?</div><div class="qopts"><button class="qopt" onclick="qans(3,'w',this)">An error</button><button class="qopt" onclick="qans(3,'w',this)">The first item</button><button class="qopt" onclick="qans(3,'c',this)">The last item</button><button class="qopt" onclick="qans(3,'w',this)">The number -1</button></div><div class="fb" id="qfb3"></div></div>
+
+  <div class="qcard blue-q"><div class="qnum">QUESTION 4</div><div class="qq">Which method adds an item to the END of a list?</div><div class="qopts"><button class="qopt" onclick="qans(4,'w',this)">add()</button><button class="qopt" onclick="qans(4,'c',this)">append()</button><button class="qopt" onclick="qans(4,'w',this)">insert()</button><button class="qopt" onclick="qans(4,'w',this)">push()</button></div><div class="fb" id="qfb4"></div></div>
+
+  <div class="qcard blue-q"><div class="qnum">QUESTION 5</div><div class="qq">What does <code>len(["a", "b", "c", "d"])</code> return?</div><div class="qopts"><button class="qopt" onclick="qans(5,'w',this)">3</button><button class="qopt" onclick="qans(5,'c',this)">4</button><button class="qopt" onclick="qans(5,'w',this)">5</button><button class="qopt" onclick="qans(5,'w',this)">0</button></div><div class="fb" id="qfb5"></div></div>
+</div>
+
+<!-- ══ CHAPTER 4: LOOPS & LISTS ══ -->
+<div class="chap"><div class="chap-line green"></div><span class="chap-lbl green">🔄 Chapter 4 · Loops + Lists = POWER COMBO!</span><div class="chap-line green rev"></div></div>
+
+<div class="scard green-t">
+  <div class="scard-hdr"><span class="scard-ico">🔄</span><div><div class="scard-title">Loop Through Your Inventory!</div><div class="scard-sub">for loops + lists = perfect team</div></div><span class="badge bg">Theory</span></div>
+  <div class="lore green"><span class="nar">🧙 SAGE CODY:</span>What if you want to check every item in your inventory? Use a <strong>for loop</strong>! It goes through each item one by one — like checking every slot in your backpack.</div>
+
+  <div class="codebox">
+inventory = [<span class="str">"sword"</span>, <span class="str">"potion"</span>, <span class="str">"shield"</span>, <span class="str">"bow"</span>]
+
+<span class="cmt"># Loop through every item:</span>
+<span class="kw">for</span> item <span class="kw">in</span> inventory:
+    <span class="fn">print</span>(<span class="str">"You have:"</span>, item)
+<span class="cmt"># → You have: sword</span>
+<span class="cmt"># → You have: potion</span>
+<span class="cmt"># → You have: shield</span>
+<span class="cmt"># → You have: bow</span>
+
+<span class="cmt"># Loop with index using enumerate:</span>
+<span class="kw">for</span> i, item <span class="kw">in</span> <span class="fn">enumerate</span>(inventory):
+    <span class="fn">print</span>(<span class="fn">f</span><span class="str">"Slot {i}: {item}"</span>)
+<span class="cmt"># → Slot 0: sword</span>
+<span class="cmt"># → Slot 1: potion ...</span>
+
+<span class="cmt"># Check if item is IN the list:</span>
+<span class="kw">if</span> <span class="str">"sword"</span> <span class="kw">in</span> inventory:
+    <span class="fn">print</span>(<span class="str">"You have a sword! ⚔️"</span>)
+  </div>
+</div>
+
+<!-- EX 5 -->
+<div class="scard green-t">
+  <div class="scard-hdr"><span class="scard-ico">🔄</span><div><div class="scard-title">Exercise 5 — Check Every Weapon!</div><div class="scard-sub">Write a for loop</div></div><span class="badge bg">EX 5/10</span></div>
+  <div class="bex green-bex">
+    <div class="ext">🔄 Loop time!</div>
+    <div class="ca">
+weapons = [<span class="str">"axe"</span>, <span class="str">"bow"</span>, <span class="str">"wand"</span>, <span class="str">"dagger"</span>]<br><br>
+<span class="cmt"># Loop and print each weapon:</span><br>
+<span class="kw">for</span> <input class="blank" id="e5b1" placeholder="????" maxlength="7"> <span class="kw">in</span> <input class="blank" id="e5b2" placeholder="????" maxlength="8">:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"Weapon:"</span>, weapon)
+    </div>
+    <div class="bgrp"><button class="btn btn-green" onclick="checkEx(5)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(5)">↺ Reset</button></div>
+    <div class="fb" id="fb5"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: for weapon in weapons</div>
+</div>
+
+<!-- EX 6 -->
+<div class="scard green-t">
+  <div class="scard-hdr"><span class="scard-ico">🔍</span><div><div class="scard-title">Exercise 6 — Is That Item in My Bag?</div><div class="scard-sub">Use the "in" keyword</div></div><span class="badge bg">EX 6/10</span></div>
+  <div class="bex green-bex">
+    <div class="ext">🔍 Check the inventory!</div>
+    <div class="ca">
+bag = [<span class="str">"apple"</span>, <span class="str">"map"</span>, <span class="str">"torch"</span>, <span class="str">"rope"</span>]<br><br>
+<span class="cmt"># Check if "map" is in the bag:</span><br>
+<span class="kw">if</span> <span class="str">"map"</span> <span class="kw"><input class="blank" id="e6b1" placeholder="??" maxlength="3"></span> bag:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"You have the map! 🗺️"</span>)<br><br>
+<span class="cmt"># Check if "sword" is NOT in the bag:</span><br>
+<span class="kw">if</span> <span class="str">"sword"</span> <span class="kw">not in</span> <input class="blank" id="e6b2" placeholder="???" maxlength="5">:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="str">"No sword — watch out! ⚠️"</span>)
+    </div>
+    <div class="bgrp"><button class="btn btn-green" onclick="checkEx(6)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(6)">↺ Reset</button></div>
+    <div class="fb" id="fb6"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: in · bag</div>
+</div>
+
+<!-- T/F SET 2 -->
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">⚡</span><div><div class="scard-title">LIGHTNING ROUND! True or False?</div><div class="scard-sub">4 more questions! 0.5 XP each!</div></div><span class="badge bl">True/False</span></div>
+  <div class="tf-grid" id="tfGrid2"></div>
+</div>
+
+<!-- ══ CHAPTER 5: SLICING ══ -->
+<div class="chap"><div class="chap-line blue"></div><span class="chap-lbl blue">✂️ Chapter 5 · Slicing — Cut the List!</span><div class="chap-line blue rev"></div></div>
+
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">✂️</span><div><div class="scard-title">Grab a Piece of the List!</div><div class="scard-sub">list[start : end]</div></div><span class="badge bl">Theory</span></div>
+  <div class="lore"><span class="nar">🧙 SAGE CODY:</span>Sometimes you only want PART of a list. Slicing lets you cut out a section! It's like taking only the first 3 items from your inventory instead of all of them.</div>
+
+  <div class="codebox">
+heroes = [<span class="str">"Aria"</span>, <span class="str">"Zara"</span>, <span class="str">"Kira"</span>, <span class="str">"Nova"</span>, <span class="str">"Luna"</span>]
+<span class="cmt">#          [0]     [1]     [2]     [3]     [4]</span>
+
+<span class="cmt"># First 3 items (index 0, 1, 2):</span>
+<span class="fn">print</span>(heroes[<span class="idx">0</span>:<span class="idx">3</span>])  <span class="cmt"># → ['Aria', 'Zara', 'Kira']</span>
+
+<span class="cmt"># From index 2 to end:</span>
+<span class="fn">print</span>(heroes[<span class="idx">2</span>:])   <span class="cmt"># → ['Kira', 'Nova', 'Luna']</span>
+
+<span class="cmt"># From start to index 3:</span>
+<span class="fn">print</span>(heroes[:<span class="idx">3</span>])   <span class="cmt"># → ['Aria', 'Zara', 'Kira']</span>
+
+<span class="cmt"># Last 2 items:</span>
+<span class="fn">print</span>(heroes[<span class="idx">-2</span>:])  <span class="cmt"># → ['Nova', 'Luna']</span>
+  </div>
+
+  <div class="nugget">
+    <strong style="color:var(--sky3)">🔑 Remember:</strong> <code>list[start:end]</code> — the END index is NOT included! Like <code>[0:3]</code> gives items 0, 1, 2 (NOT 3)!
+  </div>
+</div>
+
+<!-- EX 7 -->
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">✂️</span><div><div class="scard-title">Exercise 7 — Slice the Scoreboard!</div><div class="scard-sub">Get the top players!</div></div><span class="badge bl">EX 7/10</span></div>
+  <div class="bex">
+    <div class="ext">✂️ Slice it!</div>
+    <div class="ca">
+leaderboard = [<span class="str">"Nova"</span>, <span class="str">"Aria"</span>, <span class="str">"Kira"</span>, <span class="str">"Zara"</span>, <span class="str">"Luna"</span>]<br><br>
+<span class="cmt"># Get only the TOP 3 players:</span><br>
+top3 = leaderboard[<input class="blank" id="e7b1" placeholder="??" maxlength="4">]<br>
+<span class="fn">print</span>(top3)  <span class="cmt"># → ['Nova', 'Aria', 'Kira']</span><br><br>
+<span class="cmt"># Get players in positions 2, 3, 4 (index 1 to 3):</span><br>
+middle = leaderboard[<input class="blank" id="e7b2" placeholder="??" maxlength="4">]<br>
+<span class="fn">print</span>(middle)
+    </div>
+    <div class="bgrp"><button class="btn btn-blue" onclick="checkEx(7)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(7)">↺ Reset</button></div>
+    <div class="fb" id="fb7"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: top 3 = [:3] and middle = [1:4]</div>
+</div>
+
+<!-- EX 8 -->
+<div class="scard">
+  <div class="scard-hdr"><span class="scard-ico">🔧</span><div><div class="scard-title">Exercise 8 — Change an Item!</div><div class="scard-sub">Update a list slot</div></div><span class="badge bl">EX 8/10</span></div>
+  <div class="lore"><span class="nar">🧙 SAGE CODY:</span>You can change an item in a list by using its index! <code>mylist[2] = "new item"</code> — just like upgrading a weapon in your slot!</div>
+  <div class="bex">
+    <div class="ext">🔧 Upgrade your gear!</div>
+    <div class="ca">
+gear = [<span class="str">"old sword"</span>, <span class="str">"wooden shield"</span>, <span class="str">"basic boots"</span>]<br><br>
+<span class="cmt"># Upgrade slot 0 to "legendary sword":</span><br>
+gear[<input class="blank" id="e8b1" placeholder="?" maxlength="2">] = <span class="str">"<input class="blank" id="e8b2" placeholder="???" maxlength="16">"</span><br><br>
+<span class="cmt"># Upgrade slot 1 to "dragon shield":</span><br>
+gear[<input class="blank" id="e8b3" placeholder="?" maxlength="2">] = <span class="str">"dragon shield"</span><br><br>
+<span class="fn">print</span>(gear)
+    </div>
+    <div class="bgrp"><button class="btn btn-blue" onclick="checkEx(8)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(8)">↺ Reset</button></div>
+    <div class="fb" id="fb8"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: index 0, "legendary sword", index 1</div>
+</div>
+
+<!-- QUIZ 2 -->
+<div class="scard pink-t">
+  <div class="scard-hdr"><span class="scard-ico">🎮</span><div><div class="scard-title">BOSS QUIZ — Level 2!</div><div class="scard-sub">5 harder questions! 1 XP each!</div></div><span class="badge bp">QUIZ</span></div>
+
+  <div class="qcard pink-q"><div class="qnum">QUESTION 6</div><div class="qq">What does <code>heroes[1:4]</code> return from <code>["A","B","C","D","E"]</code>?</div><div class="qopts"><button class="qopt" onclick="qans(6,'w',this)">["A","B","C","D"]</button><button class="qopt" onclick="qans(6,'c',this)">["B","C","D"]</button><button class="qopt" onclick="qans(6,'w',this)">["B","C","D","E"]</button><button class="qopt" onclick="qans(6,'w',this)">["A","B","C"]</button></div><div class="fb" id="qfb6"></div></div>
+
+  <div class="qcard pink-q"><div class="qnum">QUESTION 7</div><div class="qq">Which correctly checks if "fire" is in a list called <code>spells</code>?</div><div class="qopts"><button class="qopt" onclick="qans(7,'w',this)">spells.has("fire")</button><button class="qopt" onclick="qans(7,'c',this)">"fire" in spells</button><button class="qopt" onclick="qans(7,'w',this)">spells.contains("fire")</button><button class="qopt" onclick="qans(7,'w',this)">check(spells, "fire")</button></div><div class="fb" id="qfb7"></div></div>
+
+  <div class="qcard pink-q"><div class="qnum">QUESTION 8</div><div class="qq">What does <code>my_list.pop()</code> do?</div><div class="qopts"><button class="qopt" onclick="qans(8,'w',this)">Adds an item</button><button class="qopt" onclick="qans(8,'w',this)">Sorts the list</button><button class="qopt" onclick="qans(8,'c',this)">Removes and returns the LAST item</button><button class="qopt" onclick="qans(8,'w',this)">Clears the whole list</button></div><div class="fb" id="qfb8"></div></div>
+
+  <div class="qcard pink-q"><div class="qnum">QUESTION 9</div><div class="qq">How do you change the FIRST item in <code>items</code> to "gem"?</div><div class="qopts"><button class="qopt" onclick="qans(9,'w',this)">items.change(0, "gem")</button><button class="qopt" onclick="qans(9,'c',this)">items[0] = "gem"</button><button class="qopt" onclick="qans(9,'w',this)">items[1] = "gem"</button><button class="qopt" onclick="qans(9,'w',this)">items.set("gem")</button></div><div class="fb" id="qfb9"></div></div>
+
+  <div class="qcard pink-q"><div class="qnum">QUESTION 10</div><div class="qq">What's the output of <code>len(["a", "b", "c"])[-1]</code>?</div><div class="qopts"><button class="qopt" onclick="qans(10,'w',this)">"c"</button><button class="qopt" onclick="qans(10,'w',this)">2</button><button class="qopt" onclick="qans(10,'c',this)">Error — len() returns a number, not a list!</button><button class="qopt" onclick="qans(10,'w',this)">"a"</button></div><div class="fb" id="qfb10"></div></div>
+</div>
+
+<!-- ══ CHAPTER 6: ADVANCED ══ -->
+<div class="chap"><div class="chap-line green"></div><span class="chap-lbl green">🏆 Chapter 6 · Boss Level — Advanced Moves!</span><div class="chap-line green rev"></div></div>
+
+<!-- EX 9 -->
+<div class="scard green-t">
+  <div class="scard-hdr"><span class="scard-ico">📝</span><div><div class="scard-title">Exercise 9 — List Comprehension!</div><div class="scard-sub">One-line magic! 🪄</div></div><span class="badge bg">EX 9/10</span></div>
+  <div class="lore green"><span class="nar">🧙 SAGE CODY:</span>List comprehension is a SUPER POWER move! You can create a whole new list in just ONE LINE. It's like applying a spell to every item at once!</div>
+  <div class="codebox">
+<span class="cmt"># Normal way (4 lines):</span>
+numbers = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>]
+doubled = []
+<span class="kw">for</span> n <span class="kw">in</span> numbers:
+    doubled.<span class="fn">append</span>(n * <span class="num">2</span>)
+
+<span class="cmt"># COMPREHENSION way (1 line!) 🪄:</span>
+doubled = [n * <span class="num">2</span> <span class="kw">for</span> n <span class="kw">in</span> numbers]
+<span class="cmt"># → [2, 4, 6, 8]</span>
+
+<span class="cmt"># With a condition — only even numbers:</span>
+evens = [n <span class="kw">for</span> n <span class="kw">in</span> numbers <span class="kw">if</span> n % <span class="num">2</span> == <span class="num">0</span>]
+<span class="cmt"># → [2, 4]</span>
+  </div>
+  <div class="bex green-bex">
+    <div class="ext">🪄 Write a comprehension!</div>
+    <div class="ca">
+scores = [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>]<br><br>
+<span class="cmt"># Double every score using comprehension:</span><br>
+doubled = [s * <span class="num">2</span> <span class="kw"><input class="blank" id="e9b1" placeholder="???" maxlength="4"></span> s <span class="kw">in</span> <input class="blank" id="e9b2" placeholder="????" maxlength="7">]<br>
+<span class="fn">print</span>(doubled)  <span class="cmt"># → [20, 40, 60, 80, 100]</span>
+    </div>
+    <div class="bgrp"><button class="btn btn-green" onclick="checkEx(9)">🚀 Check it!</button><button class="btn btn-ghost" onclick="resetEx(9)">↺ Reset</button></div>
+    <div class="fb" id="fb9"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: for · scores</div>
+</div>
+
+<!-- EX 10 -->
+<div class="scard green-t">
+  <div class="scard-hdr"><span class="scard-ico">🏆</span><div><div class="scard-title">Exercise 10 — FINAL BOSS! 🐉</div><div class="scard-sub">Everything combined!</div></div><span class="badge bb">EX 10/10</span></div>
+  <div class="lore green"><span class="nar">🧙 SAGE CODY:</span>This is it! The FINAL BOSS exercise! Combine everything you know — create a list, loop it, modify it, and print the result!</div>
+  <div class="bex green-bex">
+    <div class="ext">🐉 FINAL BOSS!</div>
+    <div class="ca">
+<span class="cmt"># Start with an empty list:</span><br>
+party = <input class="blank" id="e10b1" placeholder="??" maxlength="3"><br><br>
+<span class="cmt"># Add 3 hero names:</span><br>
+party.<input class="blank" id="e10b2" placeholder="???" maxlength="8">(<span class="str">"Aria"</span>)<br>
+party.append(<span class="str">"Nova"</span>)<br>
+party.append(<span class="str">"Kira"</span>)<br><br>
+<span class="cmt"># Sort alphabetically:</span><br>
+party.<input class="blank" id="e10b3" placeholder="????" maxlength="6">()<br><br>
+<span class="cmt"># Print each hero's slot number:</span><br>
+<span class="kw">for</span> i, hero <span class="kw">in</span> <span class="fn">enumerate</span>(party):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">print</span>(<span class="fn">f</span><span class="str">"Slot {i}: {hero}"</span>)
+    </div>
+    <div class="bgrp"><button class="btn btn-yellow" onclick="checkEx(10)">🐉 DEFEAT THE BOSS!</button><button class="btn btn-ghost" onclick="resetEx(10)">↺ Reset</button></div>
+    <div class="fb" id="fb10"></div>
+  </div>
+  <div class="hint-chip">💡 Hint: [] · append · sort</div>
+</div>
+
+<!-- ══ BONUS GAMES ══ -->
+<div class="chap"><div class="chap-line blue"></div><span class="chap-lbl blue">🎁 BONUS — Super Mini Games!</span><div class="chap-line blue rev"></div></div>
+
+<!-- MATCH GAME -->
+<div class="scard purple-t">
+  <div class="scard-hdr"><span class="scard-ico">🧩</span><div><div class="scard-title">MATCH the Methods! 🧩</div><div class="scard-sub">Connect each method to what it does! +1 XP</div></div><span class="badge bv">BONUS</span></div>
+  <div class="match-wrap">
+    <h3>🕹️ Match the Power Moves!</h3>
+    <p style="font-size:.85rem;color:rgba(240,249,255,0.55);margin-bottom:1rem;">Click a method, then click its description to match!</p>
+    <div class="match-cols">
+      <div class="mcol">
+        <div class="mlbl">Methods</div>
+        <div class="mi" id="mc0" onclick="matchLeft(0,'.append(x)')"> .append(x)</div>
+        <div class="mi" id="mc1" onclick="matchLeft(1,'.remove(x)')"> .remove(x)</div>
+        <div class="mi" id="mc2" onclick="matchLeft(2,'.sort()')"> .sort()</div>
+        <div class="mi" id="mc3" onclick="matchLeft(3,'.pop()')"> .pop()</div>
+        <div class="mi" id="mc4" onclick="matchLeft(4,'len(list)')"> len(list)</div>
+        <div class="mi" id="mc5" onclick="matchLeft(5,'.reverse()')"> .reverse()</div>
+        <div class="mi" id="mc6" onclick="matchLeft(6,'list[i]')"> list[i]</div>
+      </div>
+      <div class="mcol">
+        <div class="mlbl">What it does</div>
+        <div class="mi" id="md0" onclick="matchRight('.sort()')">Puts items in order A→Z or 1→9</div>
+        <div class="mi" id="md1" onclick="matchRight('len(list)')">Counts how many items are in the list</div>
+        <div class="mi" id="md2" onclick="matchRight('.append(x)')">Adds x to the END of the list</div>
+        <div class="mi" id="md3" onclick="matchRight('list[i]')">Gets the item at position i</div>
+        <div class="mi" id="md4" onclick="matchRight('.pop()')">Removes & returns the LAST item</div>
+        <div class="mi" id="md5" onclick="matchRight('.remove(x)')">Deletes the first x from the list</div>
+        <div class="mi" id="md6" onclick="matchRight('.reverse()')">Flips the list backwards</div>
+      </div>
+    </div>
+    <div class="mres" id="matchResult">Click a method on the left, then a description on the right! 🎮</div>
+  </div>
+</div>
+
+<!-- ORDER GAME -->
+<div class="scard yellow-t">
+  <div class="scard-hdr"><span class="scard-ico">🔀</span><div><div class="scard-title">DRAG & DROP! Put the Code in Order! 🔀</div><div class="scard-sub">Arrange the code correctly! +1 XP</div></div><span class="badge be">BONUS</span></div>
+  <div class="lore yellow"><span class="nar">🧙 SAGE CODY:</span>The code got scrambled! Drag the lines into the correct order to make a working program!</div>
+  <div class="ogame">
+    <div class="otitle">🔀 DRAG TO REORDER THE CODE!</div>
+    <div class="olist" id="orderList"></div>
+    <div class="bgrp" style="margin-top:1rem;">
+      <button class="btn btn-yellow" onclick="checkOrder()">✅ Check Order!</button>
+      <button class="btn btn-ghost" onclick="shuffleOrder()">🔀 Shuffle Again</button>
+    </div>
+    <div class="fb" id="orderFb" style="margin-top:.8rem;"></div>
+  </div>
+</div>
+
+<!-- COMPLETION -->
+<div class="compl" id="completion">
+  <span class="big">🏆</span>
+  <h2>YOU BEAT THE GAME!</h2>
+  <div style="font-size:2.5rem;margin:1rem 0;letter-spacing:4px;">⭐⭐⭐⭐⭐</div>
+  <p>INCREDIBLE! You completed LIST QUEST!<br><br>
+  You now know how to create lists, access items, use methods, loop through them, slice them, and even use list comprehension!<br><br>
+  <strong style="color:var(--yellow)">You are officially a Python List Master! 🎮🏆</strong></p>
+  <div style="margin-top:2rem;"><button class="btn btn-blue" onclick="window.scrollTo({top:0,behavior:'smooth'})">🔝 Play Again!</button></div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── CONFETTI ──
+const canvas = document.getElementById('confettiCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+
+let confetti = [];
+let confettiActive = false;
+
+function launchConfetti() {
+  confetti = [];
+  confettiActive = true;
+  const colors = ['#0ea5e9','#fde047','#f472b6','#4ade80','#a78bfa','#fb923c','#ffffff'];
+  for (let i = 0; i < 120; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: -20,
+      r: 4 + Math.random() * 6,
+      d: 2 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 20 - 10,
+      tiltSpeed: 0.1 + Math.random() * 0.2,
+      angle: 0,
+      shape: Math.random() > .5 ? 'circle' : 'rect'
+    });
+  }
+  animateConfetti();
+  setTimeout(() => { confettiActive = false; ctx.clearRect(0, 0, canvas.width, canvas.height); }, 3000);
+}
+
+function animateConfetti() {
+  if (!confettiActive) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  confetti.forEach(c => {
+    c.angle += c.tiltSpeed;
+    c.y += c.d;
+    c.x += Math.sin(c.angle) * 2;
+    c.tilt = Math.sin(c.angle) * 12;
+    ctx.fillStyle = c.color;
+    ctx.beginPath();
+    if (c.shape === 'circle') {
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    } else {
+      ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.tilt * Math.PI / 180);
+      ctx.fillRect(-c.r, -c.r/2, c.r*2, c.r);
+      ctx.restore();
+    }
+    ctx.fill();
+  });
+  confetti = confetti.filter(c => c.y < canvas.height + 40);
+  if (confetti.length > 0) requestAnimationFrame(animateConfetti);
+  else { ctx.clearRect(0, 0, canvas.width, canvas.height); confettiActive = false; }
+}
+
+// ── XP + SCORING ──
+let xp = 0; const MAX = 30;
+const LEVELS = [
+  {min:0, l:'🌟 STARTER'},
+  {min:5, l:'⚔️ WARRIOR'},
+  {min:10, l:'🧙 MAGE'},
+  {min:18, l:'🦸 HERO'},
+  {min:25, l:'🏆 LEGEND'}
+];
+let exC=0, tfC=0, qzC=0, bonC=0;
+let exD={}, tfA={1:{},2:{}}, qzD={}, bonD={};
+
+function addXP(n, el) {
+  xp = Math.min(xp + n, MAX);
+  document.getElementById('xpNum').textContent = xp;
+  document.getElementById('xpBar').style.width = (xp/MAX*100) + '%';
+  document.getElementById('progFill').style.width = (xp/MAX*100) + '%';
+  const lv = LEVELS.filter(l => l.min <= xp).pop();
+  document.getElementById('levelBadge').textContent = lv.l;
+  if (el) burst(el);
+  if (xp >= MAX) setTimeout(showComplete, 800);
+}
+
+function showPowerUp(emoji, text) {
+  const pu = document.getElementById('powerup');
+  document.getElementById('powerupEmoji').textContent = emoji;
+  document.getElementById('powerupText').textContent = text;
+  pu.classList.add('show');
+  launchConfetti();
+  setTimeout(() => { pu.classList.remove('show'); pu.style.display='none'; setTimeout(()=>pu.style.display='',100); }, 2000);
+}
+
+function burst(el) {
+  const rect = el.getBoundingClientRect();
+  const emojis = ['⭐','🎮','💎','✨','🏆'];
+  for (let i=0; i<4; i++) {
+    const b = document.createElement('span');
+    b.className = 'sb';
+    b.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    b.style.left = (rect.left + Math.random()*80) + 'px';
+    b.style.top = (rect.top + window.scrollY) + 'px';
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1100);
+  }
+}
+
+function showFB(id, ok, msg) {
+  const el = document.getElementById(id);
+  el.className = 'fb show ' + (ok ? 'ok' : 'err');
+  el.innerHTML = (ok ? '✅ ' : '❌ ') + msg;
+}
+
+function setB(id, ok) {
+  const e = document.getElementById(id);
+  if (e) { e.className = 'blank ' + (ok ? 'ok' : 'no'); }
+}
+
+function upS() {
+  document.getElementById('scEx').textContent = exC + '/10';
+  document.getElementById('scTF').textContent = tfC + '/8';
+  document.getElementById('scQz').textContent = qzC + '/10';
+  document.getElementById('scBon').textContent = bonC + '/2';
+}
+
+function showComplete() {
+  const c = document.getElementById('completion');
+  c.classList.add('show');
+  c.scrollIntoView({behavior:'smooth'});
+  launchConfetti();
+}
+
+// ── EXERCISES ──
+const EX = {
+  1:{b:[{id:'e1b1',a:'['},{id:'e1b2',a:']'}],msg:'Amazing! You built your first list! 🎒 +1 XP!'},
+  2:{b:[{id:'e2b1',a:'0'},{id:'e2b2',a:'2'},{id:'e2b3',a:'-1'}],msg:'Index master! You grabbed the right items! ⚔️ +1 XP!'},
+  3:{b:[{id:'e3b1',a:'append'},{id:'e3b2',a:'remove'},{id:'e3b3',a:'len'}],msg:'Superpower unlocked! append, remove and len — nailed it! ⚡ +1 XP!'},
+  4:{b:[{id:'e4b1',a:'sort'},{id:'e4b2',a:'reverse'}],msg:'Sorted and reversed like a pro! 📊 +1 XP!'},
+  5:{b:[{id:'e5b1',a:'weapon'},{id:'e5b2',a:'weapons'}],msg:'Loop activated! Every weapon checked! 🔄 +1 XP!'},
+  6:{b:[{id:'e6b1',a:'in'},{id:'e6b2',a:'bag'}],msg:'"in" keyword mastered! You checked the whole bag! 🔍 +1 XP!'},
+  7:{b:[{id:'e7b1',a:':3'},{id:'e7b2',a:'1:4'}],msg:'Sliced perfectly! Top 3 and middle players found! ✂️ +1 XP!'},
+  8:{b:[{id:'e8b1',a:'0'},{id:'e8b2',a:'legendary sword'},{id:'e8b3',a:'1'}],msg:'Gear upgraded! Your inventory is legendary! 🔧 +1 XP!'},
+  9:{b:[{id:'e9b1',a:'for'},{id:'e9b2',a:'scores'}],msg:'LIST COMPREHENSION! You unlocked a secret power! 🪄 +1 XP!'},
+  10:{b:[{id:'e10b1',a:'[]'},{id:'e10b2',a:'append'},{id:'e10b3',a:'sort'}],msg:'BOSS DEFEATED! 🐉 You completed the FINAL BOSS! +1 XP!'}
+};
+
+function checkEx(n) {
+  if (exD[n]) return;
+  const data = EX[n]; let allOk = true;
+  data.b.forEach(b => {
+    const v = document.getElementById(b.id).value.trim();
+    const ok = v === b.a;
+    setB(b.id, ok);
+    if (!ok) allOk = false;
+  });
+  if (allOk) {
+    exD[n] = true; exC++;
+    showFB('fb'+n, true, data.msg);
+    addXP(1, document.getElementById('fb'+n));
+    upS();
+    if (exC === 5) showPowerUp('⚔️', 'HALFWAY THERE!');
+    if (exC === 10) showPowerUp('🐉', 'ALL BOSSES DEFEATED!');
+  } else {
+    showFB('fb'+n, false, 'Not quite! Check your blanks and try again! You can do it! 💪');
+  }
+}
+function resetEx(n) {
+  EX[n].b.forEach(b => { const e=document.getElementById(b.id); if(e){e.value='';e.className='blank';}});
+  document.getElementById('fb'+n).className='fb';
+}
+
+// ── T/F ──
+const TF = {
+  1:[
+    {q:'Lists use curly braces { } to hold items.',ans:false,ex:'Nope! Lists use square brackets [ ]! Curly braces are for dictionaries.'},
+    {q:'The first item in a Python list is at index 0.',ans:true,ex:'YES! Python starts counting at 0. Mind-blowing, right? 🤯'},
+    {q:'You can put different types (strings AND numbers) in the same list.',ans:true,ex:'You got it! Lists are flexible! ["hello", 42, True] totally works! ✅'},
+    {q:'list[-1] gives you an error because negative indexes don\'t exist.',ans:false,ex:'Nope! list[-1] is totally valid — it gives you the LAST item! Sneaky Python! 😄'},
+  ],
+  2:[
+    {q:'.append() adds an item to the BEGINNING of a list.',ans:false,ex:'Not quite! .append() adds to the END. Use .insert(0, x) for the beginning!'},
+    {q:'.sort() changes the original list permanently.',ans:true,ex:'Correct! .sort() modifies the list directly. Use sorted(list) to get a new sorted list without changing the original!'},
+    {q:'"sword" in inventory returns True if sword is in the list.',ans:true,ex:'Exactly right! The "in" keyword checks if something exists in a list! 🔍'},
+    {q:'List comprehension [x*2 for x in nums] creates a brand new list.',ans:true,ex:'PERFECT! Comprehension creates a NEW list. The original nums list stays unchanged! 🪄'},
+  ]
+};
+
+function buildTF(gridId, setNum) {
+  const g = document.getElementById(gridId);
+  TF[setNum].forEach((item, ix) => {
+    const d = document.createElement('div');
+    d.className = 'tf-item';
+    d.innerHTML = `<div class="tf-q">${item.q}</div>
+      <div class="tf-btns">
+        <button class="tf-btn tft" onclick="aTF(${setNum},${ix},true,this)">✅ TRUE</button>
+        <button class="tf-btn tff" onclick="aTF(${setNum},${ix},false,this)">❌ FALSE</button>
+      </div><div class="tf-fb" id="tffb${setNum}_${ix}"></div>`;
+    g.appendChild(d);
+  });
+}
+function aTF(sn, ix, ua, btn) {
+  if (tfA[sn][ix]) return;
+  tfA[sn][ix] = true;
+  const item = TF[sn][ix];
+  const ok = ua === item.ans;
+  const fb = document.getElementById('tffb'+sn+'_'+ix);
+  fb.className = 'tf-fb show ' + (ok ? 'ok' : 'err');
+  fb.textContent = (ok ? '✅ YES! ' : '❌ Nope! ') + item.ex;
+  btn.parentElement.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
+  btn.classList.add(ok ? 'sok' : 'sno');
+  if (ok) { tfC++; upS(); addXP(0.5, fb); }
+}
+buildTF('tfGrid1', 1);
+buildTF('tfGrid2', 2);
+
+// ── QUIZ ──
+const QC = {1:'c',2:'c',3:'c',4:'c',5:'c',6:'c',7:'c',8:'c',9:'c',10:'c'};
+const QD = {};
+const QM = {
+  1:{ok:'YES! Square brackets [ ] create a list! 🎉',bad:'Nope! Parentheses ( ) = tuples. Curly { } = sets/dicts. Lists use [ ]!'},
+  2:{ok:'CORRECT! Index 0 is always the first! Python counts from zero! 🤯',bad:'Nope! Python starts at 0! The first item is always index [0]!'},
+  3:{ok:'RIGHT! The last item is always at index -1! 🔥',bad:'Negative indexes count from the end! -1 = last, -2 = second to last!'},
+  4:{ok:'PERFECT! .append() always adds to the END of the list! ✅',bad:'.add() doesn\'t exist for lists! It\'s .append() for adding to the end!'},
+  5:{ok:'YES! 4 items = len returns 4! Simple as that! 💎',bad:'Count again! ["a","b","c","d"] has 4 items → len() = 4!'},
+  6:{ok:'SLICING MASTER! [1:4] gives indexes 1, 2, 3 — end is excluded! ✂️',bad:'Remember: [1:4] gives indexes 1, 2, 3. The END index (4) is NOT included!'},
+  7:{ok:'"in" is the keyword for checking if something exists in a list! 🔍',bad:'.has() and .contains() don\'t exist in Python! Use the "in" keyword!'},
+  8:{ok:'POP removes and returns the LAST item — like popping a bubble! 💫',bad:'.pop() removes the LAST item (or item at index if you give one)!'},
+  9:{ok:'items[0] = "gem" — index 0 is FIRST! You got it! 🏆',bad:'Remember index 0 = first item! items[0] = "gem" changes the first slot!'},
+  10:{ok:'TRICKY! len() returns a number (3). You can\'t index a number! Error! 🧠',bad:'Tricky! len() returns the NUMBER 3. You can\'t do [3][-1] — that\'s an error!'}
+};
+function qans(q, ans, btn) {
+  if (QD[q]) return;
+  const ok = ans === QC[q];
+  const fb = document.getElementById('qfb'+q);
+  btn.closest('.qcard').querySelectorAll('.qopt').forEach(b => b.disabled = true);
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  fb.className = 'fb show ' + (ok ? 'ok' : 'err');
+  fb.innerHTML = (ok ? '✅ ' : '❌ ') + (ok ? QM[q].ok : QM[q].bad);
+  if (ok && !QD[q]) { QD[q]=true; qzC++; upS(); addXP(1, fb); }
+  if (qzC === 5) showPowerUp('🧙', 'QUIZ MAGE!');
+  if (qzC === 10) showPowerUp('🏆', 'QUIZ LEGEND!');
+}
+
+// ── MATCH ──
+const MP = {
+  '.append(x)':'Adds x to the END of the list',
+  '.remove(x)':'Deletes the first x from the list',
+  '.sort()':'Puts items in order A→Z or 1→9',
+  '.pop()':'Removes & returns the LAST item',
+  'len(list)':'Counts how many items are in the list',
+  '.reverse()':'Flips the list backwards',
+  'list[i]':'Gets the item at position i'
+};
+let matchSel = null, matchDone = {}, matchXP = false;
+
+function matchLeft(ix, key) {
+  if (matchDone[key]) return;
+  matchSel = {side:'left', key};
+  document.querySelectorAll('[id^="mc"]').forEach(e => e.classList.remove('sel'));
+  document.getElementById('mc'+ix).classList.add('sel');
+}
+function matchRight(key) {
+  if (!matchSel || matchSel.side !== 'left') return;
+  const lk = matchSel.key; matchSel = null;
+  document.querySelectorAll('[id^="mc"]').forEach(e => e.classList.remove('sel'));
+  if (lk === key) {
+    matchDone[key] = true;
+    document.querySelectorAll('.mi').forEach(el => {
+      if (el.textContent.trim() === lk || el.textContent.trim() === MP[lk]) el.classList.add('mat');
+    });
+    const tot = Object.keys(matchDone).length;
+    document.getElementById('matchResult').textContent = '✅ ' + tot + '/7 matched! ' + (tot>=7?'ALL MATCHED! Perfect! 🏆':'Keep going!');
+    if (tot >= 7 && !matchXP) {
+      matchXP = true; bonC++; upS();
+      addXP(1, document.getElementById('matchResult'));
+      showPowerUp('💎', 'MATCH MASTER!');
+    }
+  } else {
+    document.querySelectorAll('.mi').forEach(el => {
+      if (el.textContent.trim()===lk||el.textContent.trim()===MP[lk]) {
+        el.classList.add('bad');
+        setTimeout(() => el.classList.remove('bad'), 500);
+      }
+    });
+    document.getElementById('matchResult').textContent = '❌ Not a match! Try again — you\'ve got this! 💪';
+  }
+}
+
+// ── ORDER GAME ──
+const CO = [
+  'items = []',
+  'items.append("gem")',
+  'items.append("coin")',
+  'items.append("ring")',
+  'items.sort()',
+  'for item in items:',
+  '    print(item)'
+];
+let oItems = [...CO], oDone = false, dSrc = null;
+
+function buildOL() {
+  oItems = [...CO].sort(() => Math.random() - .5);
+  renderOL();
+}
+function renderOL() {
+  const l = document.getElementById('orderList'); l.innerHTML = '';
+  oItems.forEach((line, ix) => {
+    const it = document.createElement('div');
+    it.className = 'oi'; it.draggable = true;
+    it.innerHTML = '<span class="dh">⠿</span><span style="font-family:Courier New;font-size:.86rem;">' + esc(line) + '</span>';
+    it.addEventListener('dragstart', () => { dSrc=ix; it.classList.add('dragging'); });
+    it.addEventListener('dragend', () => { it.classList.remove('dragging'); document.querySelectorAll('.oi').forEach(i=>i.classList.remove('over')); });
+    it.addEventListener('dragover', e => { e.preventDefault(); it.classList.add('over'); });
+    it.addEventListener('dragleave', () => it.classList.remove('over'));
+    it.addEventListener('drop', e => {
+      e.preventDefault(); it.classList.remove('over');
+      if (dSrc===null||dSrc===ix) return;
+      const a=[...oItems]; const[m]=a.splice(dSrc,1); a.splice(ix,0,m);
+      oItems=a; renderOL();
+    });
+    l.appendChild(it);
+  });
+}
+function esc(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function checkOrder() {
+  const ok = oItems.every((v,i) => v === CO[i]);
+  const fb = document.getElementById('orderFb');
+  if (ok && !oDone) {
+    oDone = true;
+    fb.className = 'fb show ok';
+    fb.innerHTML = '✅ PERFECT ORDER! You arranged the code correctly! +1 XP! 🎉';
+    bonC++; upS();
+    addXP(1, fb);
+    document.getElementById('orderList').querySelectorAll('.oi').forEach(i => {
+      i.style.borderColor='var(--green)'; i.style.background='rgba(74,222,128,.08)';
+    });
+    showPowerUp('🎯', 'CODE SORTED!');
+  } else if (!ok) {
+    fb.className = 'fb show err';
+    fb.innerHTML = '❌ Not quite there yet! Think: create list → add items → sort → loop! You\'ve got this! 💪';
+  }
+}
+function shuffleOrder() {
+  oItems=[...oItems].sort(()=>Math.random()-.5);
+  renderOL();
+  document.getElementById('orderFb').className='fb';
+}
+buildOL();
+upS();
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, {threshold: 0.06});
+
+document.querySelectorAll('.scard, .chap, .qcard').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
